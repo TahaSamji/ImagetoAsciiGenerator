@@ -1,23 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 function App() {
+  const [asciiImage, setAsciiImage] = useState("");
+
+  const fetchAsciiImage = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000");
+      if (res.data) {
+        console.log(res.data);
+        setAsciiImage(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAsciiImage();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+      <div style={{backgroundColor:"bisque"}}>
+        <pre style={{ whiteSpace: 'pre', color: 'black' }} dangerouslySetInnerHTML={{ __html: asciiImage }} />
+      </div>
     </div>
   );
 }
