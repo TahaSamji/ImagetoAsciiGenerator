@@ -1,5 +1,5 @@
 
-import { useRef, useState } from 'react';import html2canvas from 'html2canvas';
+import { useEffect, useRef, useState } from 'react';import html2canvas from 'html2canvas';
 import { FadeLoader } from 'react-spinners';
 import Convert from 'image-convert-ascii';
 
@@ -49,16 +49,13 @@ function App() {
 
     }
   };
-  const handle = () => {
-  new Convert('img','pre',sizeX,sizeY);
-  setshowButton(true);
-  };
 
  
 
-  // useEffect(()=>{
-  // console.log(bgcolor)
-  // },[bgcolor])
+  useEffect(()=>{
+    new Convert('img','pre',sizeX,sizeY);
+    setshowButton(true);
+  },[sizeX,sizeY])
   return (
     <div style={{height:'100vh',width:'100vw'}}>
       <h2>Image to ASCII Generator</h2>
@@ -70,7 +67,6 @@ function App() {
         <option value='white'>White</option>
       </select>
      <div style={{display:'flex',flexDirection:"column",alignItems:'flex-start'}}>
-     <button onClick={()=>handle()}>Convert</button>
       </div>
       <FadeLoader loading={isloading} />
       {/* {text && <button 
