@@ -1,27 +1,32 @@
-import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+
+import { useRef, useState } from 'react';import html2canvas from 'html2canvas';
 import { FadeLoader } from 'react-spinners';
+import Convert from 'image-convert-ascii';
+
 
 function App() {
-  const [asciiImage, setAsciiImage] = useState("");
-  const [image, setImage] = useState();
   const [imageURL, setImageURL] = useState("");
-  const [text,setText] = useState("");
   const [isloading, setisLoading] = useState(false);
-
-  const [option,setoptions ] = useState({
-    color: false,
-    fit:'box',
-    width:100,
-    height:80
-  });
+  const [sizeX, setsizeX] = useState(100);
+  const [sizeY, setsizeY] = useState(100);
+  // const [sizeY, setsizeY] = useState(100);
   const DivRef = useRef();
+  const [bgcolor, setbg] = useState("white");
+  const [fgcolor, setfg] = useState("");
+  const [showButton,setshowButton] = useState(false);
   const handleChange = (e) => {
-    console.log(e.target.files[0])
-    setImage(e.target.files[0]);
-    
+    setImageURL(URL.createObjectURL(e.target.files[0]));
   };
+  const handleInvert = function(val){
+    console.log(val);
+    if(val === "white"){
+     setbg("white")
+     setfg("black")
+    }else{
+      setbg("black")
+      setfg("white")
+    }
+  }
   const handleCaptureClick = async () => {
     setisLoading(true);
     if (DivRef.current) {
@@ -44,86 +49,28 @@ function App() {
 
     }
   };
-  const [bgcolor, setbg] = useState("");
-
-  const fetchAsciiImage = async () => {
-    try {
-      console.log(image);
-      console.log(option);
-      const formData = new FormData();
-      formData.append('uploadFile', image);
-      formData.append('options', JSON.stringify(option)); // Append options as a JSON string
-      console.log(formData.get('uploadFile'))
-      const res = await axios("http://localhost:8000/AcscifywithoutColor",{
-        method:'post',
-        data:formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      if (res.data.html) {
-        console.log(res.data.text)
-        setText(res.data.text);
-        setbg('white');
-       setAsciiImage(res.data.html);
-       return;
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  const fetchAsciiColorImage = async () => {
-    try {
-      console.log(image);
-      console.log(option);
-      const formData = new FormData();
-      formData.append('uploadFile', image);
-      formData.append('options', JSON.stringify(option)); // Append options as a JSON string
-      console.log(formData.get('uploadFile'))
-      const res = await axios("http://localhost:8000/AcscifywithColor",{
-        method:'post',
-        data:formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      if (res.data) {
-        setbg("black");
-       setAsciiImage(res.data.html);
-       return;
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  const handle = () => {
+  new Convert('img','pre',sizeX,sizeY);
+  setshowButton(true);
   };
 
  
-  
 
-
- 
-
-  const handleColorClick = () => {
-    setoptions((prev)=>({...prev,color:true}))
-    fetchAsciiColorImage();
-    
-  };
-  const handleClick = () => {
-    setoptions((prev)=>({...prev,color:false,fit:'height',height:100}));
-    fetchAsciiImage();
-    
-  };
-  useEffect(()=>{
-  console.log(bgcolor)
-  },[bgcolor])
+  // useEffect(()=>{
+  // console.log(bgcolor)
+  // },[bgcolor])
   return (
     <div style={{height:'100vh',width:'100vw'}}>
       <h2>Image to ASCII Generator</h2>
       <input type="file" onChange={handleChange} style={{ marginBottom: 10 }} />
+      Width:<input defaultValue={sizeX} type='number' onChange={(e)=>{setsizeX(Number(e.target.value))}}></input>
+      Height<input defaultValue={sizeY} type='number' onChange={(e)=>{setsizeY(Number(e.target.value))}}></input>
+      Invert Colors : <select defaultValue={bgcolor} onChange={(e)=>handleInvert(e.target.value)}>
+        <option value='black'>Black</option>
+        <option value='white'>White</option>
+      </select>
      <div style={{display:'flex',flexDirection:"column",alignItems:'flex-start'}}>
-     Convert with Color:<button onClick={handleColorClick}>Convert</button>
-     Convert without Color<button onClick={handleClick}>Convert</button>
+     <button onClick={()=>handle()}>Convert</button>
       </div>
       <FadeLoader loading={isloading} />
       {/* {text && <button 
@@ -131,12 +78,11 @@ function App() {
 >
   Copy
 </button>} */}
-    { asciiImage && <button onClick={handleCaptureClick}>Download</button>}
+    {showButton && <button onClick={handleCaptureClick}>Download Image </button>}
       <div  style={{display:'flex'}}>
-        <pre  ref={DivRef} style={{ backgroundColor:'black',color:'white',whiteSpace: 'pre',fontSize:8 }} dangerouslySetInnerHTML={{ __html: asciiImage }} />
-      
-       
+      <pre ref={DivRef} id='pre' style={{backgroundColor:bgcolor,color:fgcolor}}></pre>
       </div>
+     <img  id='img' alt=""src={imageURL}></img>
     </div>
   );
 }
