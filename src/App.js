@@ -49,13 +49,16 @@ function App() {
 
     }
   };
-
- 
-
-  useEffect(()=>{
-    new Convert('img','pre',sizeX,sizeY);
+  const handle = () => {
+    if (sizeX < 100 || sizeY < 100) {
+      window.alert("Size should not go below 100");
+      setsizeX(100);
+      setsizeY(100);
+      return;
+    }
+    new Convert('img', 'pre', sizeX, sizeY);
     setshowButton(true);
-  },[sizeX,sizeY])
+  };
   return (
     <div style={{height:'100vh',width:'100vw'}}>
       <h2>Image to ASCII Generator</h2>
@@ -67,6 +70,7 @@ function App() {
         <option value='white'>White</option>
       </select>
      <div style={{display:'flex',flexDirection:"column",alignItems:'flex-start'}}>
+     <button onClick={()=>handle()}>Generate</button>
       </div>
       <FadeLoader loading={isloading} />
       {/* {text && <button 
